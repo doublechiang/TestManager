@@ -3,16 +3,15 @@ import logging
 import os
 import csv
 from flask_restful import fields, marshal_with
+from flask_restful import Resource
+from flask_apispec import marshal_with, doc
+from flask_apispec.views import MethodResource
+
 
 import settings
 
-wip_fileds = {
-    'racksn' : fields.String,
-    'location' : fields.String,
-    'uuts' : fields.List(fields.String)
-}
 
-class SfHand:
+class SfHand(MethodResource, Resource):
     SF_HOST='192.168.204.9'
     SF_SHARE='Monitor'
     SF_WIP_LISTING_FN = 'CurrentRackData.csv'
@@ -20,6 +19,8 @@ class SfHand:
 
 
     def getWip(self):
+        """ Get the list of WIP (Work In Place) racks
+        """
         cmd = "smbclient --user='{}%{}' '//{}/{}' -c 'get {} {}'".format(settings.SF_SHAREUSER, settings.SF_SHAREPASS, self.SF_HOST, self.SF_SHARE, self.SF_RACKDEFPATH, self.SF_WIP_LISTING_FN)
         logging.debug(cmd)
         try:
@@ -39,18 +40,24 @@ class SfHand:
                     header = True
                     continue
                 # Create the dictionary use rack serial as the key and location as the value, and the list of the uut serial
+                location, racksn, uutsn= row[0], row[1], row[2]
                 rack = wip.get(row[1], dict())
-                rack['location'] = row[0]
-                rack['racksn']  = row[1]
+                rack['location'] = location
+                rack['racksn']  = racksn
                 uuts = rack.get('uuts', [])
-                if row[2] not in uuts:
-                    uuts.append(row[2])
+                if uutsn not in uuts:
+                    uuts.append({'uutsn': uutsn})
                 rack['uuts'] = uuts
-                wip.update({row[1]: rack})
+                wip.update({racksn: rack})
 
         os.unlink(self.SF_WIP_LISTING_FN)
                 
-        return wip
+        return list(wip.values())
+    
+    def post(self):
+        """ 
+        """
+        return 
 
     
 
