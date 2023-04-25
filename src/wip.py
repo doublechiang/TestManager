@@ -7,7 +7,7 @@ from sfhand import SfHand
 
 
 class UUTSchema(Schema):
-    uutsn = fields.String(default='Success')
+    uutsn = fields.String()
 
 class RackSchema(Schema):
     location = fields.String()

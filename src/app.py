@@ -11,15 +11,14 @@ import os
 import datetime
 import json
 
-
-
-# from uut import UutResource
-
-from uut import Uut
 from wip import Wip
+from sfhand import SfHand
+from racktm import UUTManager
 
 app = Flask(__name__)
 api = Api(app)
+api.utm = UUTManager()
+api.utm.start()
 app.config['APPLICATION_ROOT'] = 'RackTestManager'
 # logging.basicConfig(level=logging.WARNING)
 logging.basicConfig(level=logging.DEBUG)
@@ -37,7 +36,9 @@ app.config.update({
 
 docs = FlaskApiSpec(app)
 api.add_resource(Wip, '/wip')
-docs.register(Wip)
+api.add_resource(SfHand, '/sfhand')
+docs.register(Wip, endpoint='wip')
+docs.register(SfHand, endpoint='sfhand')
    
 
 if __name__ == '__main__':
