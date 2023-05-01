@@ -18,7 +18,7 @@ from racktm import UUTManager
 app = Flask(__name__)
 api = Api(app)
 api.utm = UUTManager()
-api.utm.start()
+# api.utm.start()
 app.config['APPLICATION_ROOT'] = 'RackTestManager'
 # logging.basicConfig(level=logging.WARNING)
 logging.basicConfig(level=logging.DEBUG)

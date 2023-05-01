@@ -4,7 +4,7 @@ import os
 import csv
 import shutil, time
 import configparser
-from flask import request
+from flask import request, jsonify
 from flask_restful import fields, marshal_with
 from flask_restful import Resource
 from flask_apispec import marshal_with, doc, use_kwargs
@@ -85,7 +85,7 @@ class SfHand(MethodResource, Resource):
         return list(wip.values())
 
     @use_kwargs(SfRequestSchema)
-    @marshal_with(SfResponseSchema)
+    # @marshal_with(SfResponseSchema)
     def post(self, **kwargs):
         """ ShopFloor Acesss API, POST method
             The request body should be a JSON object, with the following fields:
@@ -97,10 +97,9 @@ class SfHand(MethodResource, Resource):
             'Request' : 'UUTConfig2' or 'Linkall' or 'Status'
 
         """
-        logging.debug(request)
 
         try:
-            print(request.json)
+            logging.debug(request.json)
             SfRequestSchema().load(request.json)
         except ValidationError as e:
             logging.error(e)
@@ -115,18 +114,25 @@ class SfHand(MethodResource, Resource):
                 f.write(f'{key}={value}\n')
 
         try:
-            request_foder = f'{self.WIN_FOLDER}/{request.json.get("Model")}/Request'
-            respond_file = f'{self.WIN_FOLDER}/{request.json.get("Model")}/Response/{fn}.txt'
-            shutil.copy(f'{fn}.txt', request_foder)
-            os.unlink(f'{fn}.txt')
-            if self.__wait_for(respond_file):
-                respond_dict=self.__map_ini_to_dict(respond_file)
-                
+            req_type = request.json.get('Request')
+            respond_dict = dict()
+            if req_type == 'Status':
+                request_foder = f'{self.WIN_FOLDER}/{request.json.get("Model")}/Status'
+                shutil.copy(f'{fn}.txt', request_foder)
+                os.unlink(f'{fn}.txt')
             else:
-                error = f'shopflow respone file {self.RES_FOLDER + req_fn} not found.'
+                request_foder = f'{self.WIN_FOLDER}/{request.json.get("Model")}/Request'
+                respond_file = f'{self.WIN_FOLDER}/{request.json.get("Model")}/Response/{fn}.txt'
+                shutil.copy(f'{fn}.txt', request_foder)
+                os.unlink(f'{fn}.txt')
+                if self.__wait_for(respond_file):
+                    respond_dict=self.__map_ini_to_dict(respond_file)
+                    print(respond_dict)
+                else:
+                    error = f'shopflow respone file {respond_file} not found.'
         except Exception as e:
             logging.error(e)
-            error = e
+            respond_dict = {'error': str(e)}
         return respond_dict, 201
     
     def __wait_for(self, fn, timeout=100):
@@ -145,7 +151,9 @@ class SfHand(MethodResource, Resource):
         with open(fname) as stream:
             stream = "[dummy]\n" + stream.read()
 
+        config.optionxform = str                            # disable the case sensitive
         config.read_string(stream)
+        
         return {k:v for k, v in config['dummy'].items()}
 
 

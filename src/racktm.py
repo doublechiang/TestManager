@@ -24,7 +24,8 @@ class UUTManager:
         return prjs
     
     def start(self):
-        prjs = self.getPrjFolder('../seeds/WIN')
+        # prjs = self.getPrjFolder('../seeds/WIN')
+        prjs = self.getPrjFolder('/WIN')
         observer = Observer()
         for p in prjs:
             f = CfgFolder(p.folder)
