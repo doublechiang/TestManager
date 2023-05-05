@@ -8,8 +8,12 @@ import logging
 from cfgfldr import CfgFolder
 from uut import Uut
 from rack import Rack, RackSchema
+from resconfig import ResponseConfig
 
 class UUTManager:
+    ''' The UUT manager class
+        Contain the racks and uuts information
+    '''
     def getPrjFolder(self, win_root):
         """ The WIN folder has resonse/config folder to store the config files.
             Parameters: win_root: the root folder of WIN
@@ -23,19 +27,25 @@ class UUTManager:
                 prjs.append(Project(entry, fldr))
         return prjs
     
-    def start(self):
+    def start(self, win_root):
         # prjs = self.getPrjFolder('../seeds/WIN')
-        prjs = self.getPrjFolder('/WIN')
+        prjs = self.getPrjFolder(win_root)
         observer = Observer()
         for p in prjs:
             f = CfgFolder(p.folder)
             f.setNotifier(self.uutNotifier)
             observer.schedule(CfgFolder(p.folder), p.folder, recursive=False)
-            uuts = Uut.parse_dir(p.folder)
-            self.uuts.extend(uuts)
+            cfgs = ResponseConfig.parse_dir(p.folder)
+            for pair in cfgs:
+                rack, uut = pair
+                
+                logging.debug(f'rack:{rack}, uut:{uut}')
+                rack.updateUut(uut)
+                if rack not in self.racks:
+                    self.racks.append(rack)
+                self.uuts.append(uut)
+            
         observer.start()
-        for u in self.uuts:
-            self.__parseConfig(u)
 
     def uutNotifier(self, cfg_path):
         """ Callback notifier for uut config file change 
@@ -49,7 +59,30 @@ class UUTManager:
         rack = RackSchema().load(RackSchema().dump(uut))
         print(rack)
 
+    def getRackCollection(self):
+        return self.racks
+
+
+    def getRack(self, racksn):
+        """ Get the rack instance by the rack serial number
+        """
+        for r in self.racks:
+            if r.RACKSN == racksn:
+                return r
+        return {}
     
+    def getUutCollection(self):
+        print(self.uuts)
+        return self.uuts
+    
+    def getUut(self, sn):
+        ''' Get the UUT by SN, idealy any serial number. 
+        '''
+        for r in self.uuts:
+            if r.CHASSISSN == sn:
+                return r
+        return {}
+   
     def __init__(self):
         self.uuts = []
         self.racks = []
