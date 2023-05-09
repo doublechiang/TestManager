@@ -2,8 +2,4 @@ flask
 gunicorn
 flask_restful
 watchdog
-flask-restful 
-# flask-swagger-ui
-# flask_restful_swagger_3
-apispec
 flask_apispec

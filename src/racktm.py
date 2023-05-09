@@ -9,6 +9,7 @@ from cfgfldr import CfgFolder
 from uut import Uut
 from rack import Rack, RackSchema
 from resconfig import ResponseConfig
+from sfhand import SfHand
 
 class UUTManager:
     ''' The UUT manager class
@@ -38,11 +39,15 @@ class UUTManager:
             cfgs = ResponseConfig.parse_dir(p.folder)
             for pair in cfgs:
                 rack, uut = pair
-                
                 logging.debug(f'rack:{rack}, uut:{uut}')
-                rack.updateUut(uut)
-                if rack not in self.racks:
+                for r in self.racks:
+                    if r == rack:
+                        rack = r
+                        break
+                else:
                     self.racks.append(rack)
+
+                rack.updateUut(uut)
                 self.uuts.append(uut)
             
         observer.start()
@@ -52,12 +57,6 @@ class UUTManager:
         """
         uut = Uut.parse_file(cfg_path)
 
-    def __parseConfig(self, uut):
-        """ UUT manager will parse the config file and create the UUT instance
-        """
-        logging.debug(f'Parse config file {uut}')
-        rack = RackSchema().load(RackSchema().dump(uut))
-        print(rack)
 
     def getRackCollection(self):
         return self.racks
@@ -72,16 +71,19 @@ class UUTManager:
         return {}
     
     def getUutCollection(self):
-        print(self.uuts)
         return self.uuts
     
     def getUut(self, sn):
         ''' Get the UUT by SN, idealy any serial number. 
         '''
         for r in self.uuts:
-            if r.CHASSISSN == sn:
-                return r
+            for attr in ['CHASSISSN', 'ChassisSN', 'MLBSN', 'CSN']:
+                if r.__dict__.get(attr) == sn:
+                    return r
         return {}
+    
+    def getWipCollection(self):
+        return SfHand().getWip()
    
     def __init__(self):
         self.uuts = []

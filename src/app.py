@@ -20,7 +20,8 @@ from uut import UutListResource, UutResource
 app = Flask(__name__)
 api = Api(app)
 api.utm = UUTManager()
-api.utm.start('../seeds/WIN')
+# api.utm.start('../seeds/WIN')
+api.utm.start('/WIN')
 app.config['APPLICATION_ROOT'] = 'RackTestManager'
 # logging.basicConfig(level=logging.WARNING)
 logging.basicConfig(level=logging.DEBUG)

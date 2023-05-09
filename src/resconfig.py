@@ -68,5 +68,6 @@ class ResponseConfig:
             if ext == ".txt":
                 print(f'Parsing config file {path + f}')
                 rack, uut = ResponseConfig().parseConfig(path + f)
-                cfgs.append((rack, uut))
+                if rack is not None and uut is not None:
+                    cfgs.append((rack, uut))
         return cfgs

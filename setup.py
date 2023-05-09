@@ -28,5 +28,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     keywords='UUT Test Manager',
-    install_requires=[]
+    install_requires=['flask', 'gunicorn', 'flask-restful', 'flask_apispec', 'watchdog']
  )
