@@ -10,7 +10,9 @@ class CfgFolder(FileSystemEventHandler):
     ''' Folder  processing Quanta configuration files 
     '''
     def on_modified(self, event):
-        logging.debug(f'on_modify:{event}')
+        # logging.debug(f'on_modify:{event}')
+        logging.info(f'on_modify:{event}')
+#        print(f'on_modify:{event}' )
         if isinstance(event, FileModifiedEvent):
             if self.notifier is not None:
                 self.notifier(event.src_path)
@@ -18,6 +20,7 @@ class CfgFolder(FileSystemEventHandler):
 
     def on_created(self, event):
         logging.debug(f'on_created:{event}')
+ #       print(f'on_created:{event}')
         if isinstance(event, FileCreatedEvent):
             if self.notifier is not None:
                 self.notifier(event.src_path)

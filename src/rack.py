@@ -1,5 +1,5 @@
 import json
-from flask import Flask, jsonify
+from flask import Flask, jsonify, make_response
 from flask_restful import Api, Resource, reqparse, abort, marshal_with
 from marshmallow import Schema, fields, post_load, EXCLUDE
 from flask_apispec import doc
@@ -35,7 +35,7 @@ class RackList(MethodResource, Resource):
         racksn_list = list(map(lambda r: r.get('racksn'), wip))
         racks = [ r for r in racks if r.RACKSN in racksn_list]
 
-        return json.dumps(racks, default=lambda o: o.__dict__)
+        return json.loads(json.dumps(racks, default=lambda o: o.__dict__))
     
 
 class RackResource(MethodResource, Resource):
@@ -52,7 +52,9 @@ class RackResource(MethodResource, Resource):
         racksn_list = list(map(lambda r: r.get('racksn'), wip))
         if rack.RACKSN not in racksn_list:
             rack = {}
-        return json.dumps(rack, default=lambda o: o.__dict__) 
+        return json.loads(json.dumps(rack, default=lambda o: o.__dict__))
+        # response =make_response(jsonify(str(rack)), 201)
+        # return response
 
    
 class Rack:
@@ -76,6 +78,6 @@ class Rack:
         else:
             self.uuts[self.uuts.index(uut)] = uut
 
-    def to_json(self):
+    def toJson(self):
         return json.dumps(self, default=lambda o: o.__dict__)
             

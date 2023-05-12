@@ -53,7 +53,7 @@ docs.register(UutResource, resource_class_kwargs={'api': api})
    
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5030)
 
 
    

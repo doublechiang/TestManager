@@ -17,7 +17,7 @@ from marshmallow import Schema, fields, EXCLUDE, INCLUDE, post_load
 
 class UutSchema(Schema):
     class Meta:
-        unknown = EXCLUDE
+        unknown = INCLUDE
     MLB = fields.String()
     CHASSISSN = fields.String()
     MLBSN= fields.String()
@@ -44,7 +44,7 @@ class UutListResource(MethodResource, Resource):
         uuts = [ u for u in uuts if u.RACKSN in racksn_list]
         # TODO, check the UUT validation from the racksn. the WIP rack should contain the WIP UUT.
             
-        return json.dumps(uuts, default=lambda o: o.__dict__)
+        return json.loads(json.dumps(uuts, default=lambda o: o.__dict__))
     
 class UutResource(MethodResource, Resource):
     def __init__(self, api) -> None:
@@ -54,7 +54,7 @@ class UutResource(MethodResource, Resource):
     def get(self, sn):
         utm = self.api.utm
         uut = utm.getUut(sn)
-        return json.dumps(uut, default=lambda o: o.__dict__) 
+        return json.loads(json.dumps(uut, default=lambda o: o.__dict__))
 
     
 class Uut:
